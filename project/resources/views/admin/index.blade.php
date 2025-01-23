@@ -2,6 +2,10 @@
 
 @section('title', 'Admin Dashboard')
 
+@section('page-header-title')
+<h1 class="m-0">Dashboard</h1>
+@endsection
+
 @section('bread-crumb')
 @parent
 <li class="breadcrumb-item active">Dashboard v2</li>
