@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CategoriesController extends Controller
 {
@@ -15,7 +16,7 @@ class CategoriesController extends Controller
     {
         $categories = Category::all();
         // return $categories;
-        return view('admin.categories.index');
+        return view('admin.categories.index', compact('categories'));
     }
 
     /**
@@ -23,7 +24,11 @@ class CategoriesController extends Controller
      */
     public function create()
     {
-        //
+        $categories = Category::select(['id', 'name'])->get();
+        // return $categories;
+        return view('admin.categories.create', [
+            'categories'  =>  $categories,
+        ]);
     }
 
     /**
@@ -42,8 +47,15 @@ class CategoriesController extends Controller
         // $request->except(['name', 'image'])
 
         // PRG : is to change the post method to get method after finishing the proccess of fill data, you do this by redirect user to a page after the post request (store method) ends
-        
+
         // Request Merge : is to add an additional data to the data you recieved before storing it to DB 
+
+        $request->merge([
+            'slug' => Str::slug($request->name),
+        ]);
+        Category::create($request->except('_token'));
+        return redirect()->route('dashboard.categories.index')->with('success', 'category addedd successfully');
+        // return $request;
 
 
     }
@@ -59,9 +71,16 @@ class CategoriesController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(string $slug)
     {
-        //
+        $currentCategory = Category::where('slug', $slug)->first();
+        $parent_categories = Category::select(['id', 'name', 'parent_id'])
+        ->where('id', '<>', $currentCategory->id)
+        ->where(function($query) use($currentCategory) {
+            $query->where('parent_id', '<>', $currentCategory->id)->orWhere('parent_id', null);
+        })->get();
+        // return view('admin.categories.edit', compact('currentCategory', 'parent_categories'));
+        return $parent_categories;
     }
 
     /**
@@ -69,7 +88,10 @@ class CategoriesController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // return $request;
+        $currentCategory = Category::findorfail($id);
+        $currentCategory->update($request->except('_token'));
+        return redirect()->route('dashboard.categories.index')->with('success', 'category updated successfully');
     }
 
     /**
@@ -77,6 +99,7 @@ class CategoriesController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        Category::destroy($id);
+        return redirect()->route('dashboard.categories.index')->with('success', 'category Deleted successfully');
     }
 }
