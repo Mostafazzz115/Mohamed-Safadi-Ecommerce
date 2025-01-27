@@ -23,7 +23,7 @@
                     <div class="card card-primary">
                         <!-- /.card-header -->
                         <!-- form start -->
-                        <form action="{{ route('dashboard.categories.update' , $currentCategory->id) }}" method="POST">
+                        <form action="{{ route('dashboard.categories.update' , $currentCategory->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('put')
                             <div class="card-body">
